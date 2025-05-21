@@ -11,8 +11,8 @@ from tensorflow.keras.optimizers import Adam #pyright: ignore
 # TensorFlow optimizavimai
 tf.config.threading.set_intra_op_parallelism_threads(2)
 tf.config.threading.set_inter_op_parallelism_threads(2)
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Išjungti įspėjimus
-tf.config.run_functions_eagerly(False)  # Greičiau
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+tf.config.run_functions_eagerly(False)
 
 # Išjungti visas GPU, kad būtų pastovus veikimas
 tf.config.set_visible_devices([], 'GPU')
@@ -39,8 +39,6 @@ def objective(trial):
     generator = MazeGenerator()
     maze = generator.generate_random_maze(5)
     
-    # Įsitikinti, kad labirintas nėra per sudėtingas mokymui
-    # Sumažinkime sienų skaičių papildomai, kad būtų lengviau mokytis
     for row in range(5):
         for col in range(5):
             if maze.is_wall(row, col):
@@ -49,13 +47,11 @@ def objective(trial):
     
     env = Environment(maze)
     
-    # Sukurti agentą
     input_shape = (5, 5, 3)
     agent = DQNAgent(input_shape=input_shape)
     agent.gamma = gamma
     agent.epsilon_decay = epsilon_decay
     
-    # Paprastas modelis
     model = Sequential()
     model.add(Flatten(input_shape=input_shape))
     model.add(Dense(fixed_params['hidden_units'], activation='relu'))
@@ -63,12 +59,10 @@ def objective(trial):
     model.compile(
         loss='mse', 
         optimizer=Adam(learning_rate=learning_rate),
-        # Pridėti kintamąjį, kad būtų greičiau
         run_eagerly=False
     )
     agent.model = model
     
-    # Apmokymas
     success_count = 0
     scores = []
     
@@ -81,7 +75,6 @@ def objective(trial):
         steps = 0
         
         while not done and steps < fixed_params['max_steps']:
-            # Veiksmo pasirinkimas
             action = agent.act(state)
             next_state, reward, done, _ = env.step(action)
             
@@ -108,15 +101,12 @@ def objective(trial):
                     else:
                         target[a] = r + gamma * np.max(model.predict(ns, verbose=0)[0])
                     targets[i] = target
-                
-                # Vienas apmokymo žingsnis visiems duomenims
+            
                 model.fit(states, targets, epochs=1, verbose=0, batch_size=batch_size)
         
-        # Patikrinti, ar pasiekė tikslą
         if env.current_pos == env.end:
             success_count += 1
         
-        # Atnaujinti epsilon
         if agent.epsilon > agent.epsilon_min:
             agent.epsilon *= epsilon_decay
         
@@ -124,7 +114,6 @@ def objective(trial):
         print(f"Trial {trial.number}, Epizodas {episode+1}/{fixed_params['episodes']}: " +
               f"Rezultatas={score:.2f}, Epsilon={agent.epsilon:.2f}, Žingsniai={steps}")
     
-    # Apskaičiuoti metrikos
     avg_score = np.mean(scores)
     success_rate = success_count / fixed_params['episodes']
     
@@ -135,13 +124,10 @@ def objective(trial):
 def optimize_and_save():
     print("Pradedamas hiperparametrų optimizavimas")
     
-    # Sukurti Optuna studiją
     study = optuna.create_study(direction='maximize')
     
-    # Optimizuoti parametrus - mažesnis bandymų skaičius
-    study.optimize(objective, n_trials=8)  # 8 bandymai vietoj 10
+    study.optimize(objective, n_trials=8)
     
-    # Išvesti ir išsaugoti geriausius parametrus
     print("\nGeriausi parametrai:")
     for key, value in study.best_params.items():
         print(f"  {key}: {value}")

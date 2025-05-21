@@ -2,9 +2,7 @@ import numpy as np
 import random
 from maze import Maze
 
-class MazeGenerator:
-    """Klasė labirintų generavimui"""
-    
+class MazeGenerator:    
     def __init__(self):
         """Inicializuoja labirinto generatorių"""
         pass
@@ -18,20 +16,16 @@ class MazeGenerator:
         Returns:
             Maze: sugeneruotas labirintas
         """
-        # Sukurti naują labirintą
         maze = Maze(size)
         
-        # Užpildyti jį atsitiktinėmis sienomis (30% tikimybė)
         for row in range(size):
             for col in range(size):
                 if random.random() < 0.3:
                     maze.set_wall(row, col)
         
-        # Nustatyti pradžios ir pabaigos taškus
         maze.set_start(0, 0)
         maze.set_end(size-1, size-1)
         
-        # Užtikrinti, kad yra kelias nuo pradžios iki pabaigos
         self._ensure_path(maze)
         
         return maze

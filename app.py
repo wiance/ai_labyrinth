@@ -95,7 +95,6 @@ def train_agent_route():
     agent.train(env, episodes=episodes, batch_size=32)
     training_time = time.time() - start_time
     
-    # Išsaugoti apmokytą modelį
     agent.save_model(maze.size)
     
     flash(f'Modelis sėkmingai apmokytas per {training_time:.2f} sekundes ({episodes} epizodai)!')
@@ -114,36 +113,27 @@ def solve_maze_route():
         flash('Pirmiausia apmokykite modelį!')
         return redirect(url_for('index'))
     
-    # Atstatyti aplinką
     state = env.reset()
     done = False
     steps = 0
     path = [maze.start]
     
-    # Išjungti tyrinėjimą testavimo metu
     epsilon_backup = agent.epsilon
     agent.epsilon = 0.0
     
-    # Padidinti maksimalų žingsnių skaičių
-    max_steps = maze.size * maze.size * 2  # Didesnis žingsnių limitas
+    max_steps = maze.size * maze.size * 2 
     
-    # Spręsti labirintą
     start_time = time.time()
-    while not done and steps < max_steps:  # Pakeista iš env.max_steps į max_steps
-        # Pasirinkti veiksmą
+    while not done and steps < max_steps:
         action = agent.act(state)
         
-        # Atlikti veiksmą
         state, reward, done, _ = env.step(action)
         
-        # Įsiminti poziciją
         path.append(env.current_pos)
         steps += 1
     
-    # Atstatyti epsilon
     agent.epsilon = epsilon_backup
     
-    # Išsaugoti sprendimo kelią
     solution_path = path
     
     solve_time = time.time() - start_time

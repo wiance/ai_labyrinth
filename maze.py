@@ -62,32 +62,3 @@ class Maze:
         
         return neighbors
     
-    def visualize(self, path=None):
-        """Atvaizduoja labirintą
-        
-        Args:
-            path: kelias, jei yra (eilutė, stulpelis) taškų sąrašas
-        """
-        # Sukurti vizualizacijos masyvą
-        viz = np.zeros(self.grid.shape, dtype=str)
-        
-        # Užpildyti pagal labirinto reikšmes
-        viz[self.grid == 1] = '██'  # Siena (naudojame du simbolius, kad būtų kvadratinis)
-        viz[self.grid == 0] = '  '  # Kelias
-        
-        # Pažymėti kelią, jei jis yra
-        if path:
-            for pos in path:
-                row, col = pos
-                if pos != self.start and pos != self.end:
-                    viz[row, col] = '··'  # Kelio taškas
-        
-        # Pažymėti pradžią ir pabaigą
-        viz[self.start] = 'S '  # Pradžia
-        viz[self.end] = 'E '  # Pabaiga
-        
-        # Atspausdinti labirintą
-        print("+" + "-" * (self.size * 2) + "+")
-        for row in viz:
-            print("|" + ''.join(row) + "|")
-        print("+" + "-" * (self.size * 2) + "+")

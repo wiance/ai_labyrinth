@@ -3,6 +3,7 @@ import random
 import tensorflow as tf
 import time
 import os
+
 from tensorflow.keras.models import Sequential #pyright: ignore
 from tensorflow.keras.layers import Dense, Flatten, Conv2D #pyright: ignore
 from tensorflow.keras.optimizers import Adam #pyright: ignore
@@ -25,14 +26,14 @@ class DQNAgent:
         maze_size = input_shape[0]
 
         if maze_size <= 5:
-            self.memory = deque(maxlen=2000)  # Pakankama, bet ne per didelė atmintis
-            self.gamma = 0.95  # Geras balansas tarp trumpalaikio ir ilgalaikio atlygio
-            self.epsilon_decay = 0.92  # Greičiau pereina prie žinių panaudojimo
-            self.learning_rate = 0.002  # Šiek tiek padidinta, bet ne per didelė
+            self.memory = deque(maxlen=2000)
+            self.gamma = 0.95
+            self.epsilon_decay = 0.92
+            self.learning_rate = 0.002
             print(f"Naudojami parametrai mažam {maze_size}x{maze_size} labirintui")
 
         elif maze_size <= 8:
-            self.memory = deque(maxlen=1500)
+            self.memory = deque(maxlen=2000)
             self.epsilon_decay = 0.9
             self.gamma = 0.93
             self.learning_rate = 0.003
@@ -76,7 +77,7 @@ class DQNAgent:
         self.memory.append((state, action, reward, next_state, done))
 
     def act(self, state):
-        """Pasirenka veiksmą pagal epsilon-godųjį metodą"""
+        """Pasirenka veiksmą pagal epsilon-greedy metodą"""
         if np.random.rand() <= self.epsilon:
             return random.randrange(self.action_space)
         

@@ -10,19 +10,16 @@ class Environment:
             maze: labirintas (Maze objektas)
         """
         self.maze = maze
-        self.grid = maze.grid  # Nuoroda į labirinto grid masyvą
-        self.start = maze.start  # Pradžios pozicija
-        self.end = maze.end  # Pabaigos pozicija
-        self.size = maze.size  # Labirinto dydis
+        self.grid = maze.grid
+        self.start = maze.start
+        self.end = maze.end
+        self.size = maze.size
         
-        # Agento būsena
-        self.current_pos = self.start  # Dabartinė pozicija
-        self.steps = 0  # Žingsnių skaičius
+        self.current_pos = self.start
+        self.steps = 0
         
-        # Maksimalus žingsnių skaičius - dvigubas labirinto dydis
         self.max_steps = self.size * self.size * 2
-        
-        # Galimi veiksmai: 0-aukštyn, 1-dešinėn, 2-žemyn, 3-kairėn
+    
         self.actions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
     
     def reset(self):
