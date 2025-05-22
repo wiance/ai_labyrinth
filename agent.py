@@ -129,7 +129,6 @@ class DQNAgent:
             done = False
             steps = 0
             
-            # Adaptyvus žingsnių limitas pagal labirinto dydį
             max_steps = min(50, env.size * env.size)
             
             while not done and steps < max_steps:
@@ -140,11 +139,11 @@ class DQNAgent:
                 score += reward
                 steps += 1
 
-                # Mokytis kas 10 žingsnių
+                # kas 10 žingsnių
                 if len(self.memory) > batch_size and steps % 10 == 0:
                     self.replay(batch_size)
                     
-                # Pridėti mažą pauzę, kad CPU nesiektų 100%
+                # maža pauzė, kad CPU nesiektų 100%
                 if steps % 20 == 0:
                     time.sleep(0.001)
             
@@ -157,7 +156,6 @@ class DQNAgent:
                 f"Laikas: {episode_time:.2f}s"
             )
             
-            # Išsaugoti gerą modelį
             if score > 9.0 and env.current_pos == env.end:
                 self.save_model(env.size)
                 print(f"Išsaugotas geras modelis po epizodo {episode+1}")
@@ -182,7 +180,6 @@ class DQNAgent:
                 print(f"Rastas modelio failas: {model_path}")
                 self.model = load_model(model_path)
                 print(f"Sėkmingai įkeltas apmokytas modelis!")
-                # Nustatyti mažą epsilon reikšmę
                 self.epsilon = 0.1
                 return True
             else:

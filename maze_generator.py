@@ -32,17 +32,14 @@ class MazeGenerator:
     
     def _ensure_path(self, maze):
         """Užtikrina, kad egzistuoja kelias nuo pradžios iki pabaigos
+        Mokymosi fazė
         
         Args:
             maze: labirintas
         """
-        # Paprastas būdas - tiesiog sukurti kelią palei kraštus
-        
-        # Sukurti kelią žemyn
         for row in range(maze.size):
             maze.set_path(row, 0)
         
-        # Sukurti kelią dešinėn apatiniame eilutėje
         for col in range(maze.size):
             maze.set_path(maze.size-1, col)
 
@@ -56,6 +53,4 @@ class MazeGenerator:
         Returns:
             Maze: sugeneruotas labirintas
         """
-        # Ši funkcija implementuotų DFS algoritmą labirinto generavimui
-        # Dėl paprastumo, naudojame tą patį ką ir generate_random_maze
         return self.generate_random_maze(size)

@@ -85,11 +85,9 @@ def objective(trial):
             
             # Apmokyti modelį kas 10 žingsnių
             if len(agent.memory) > fixed_params['batch_size'] and steps % 10 == 0:
-                # Optimizuotas apmokymas
                 batch_size = fixed_params['batch_size']
                 batch = random.sample(agent.memory, batch_size)
                 
-                # Paruošti duomenis vienam apmokymui
                 states = np.zeros((batch_size, *input_shape))
                 targets = np.zeros((batch_size, 4))
                 

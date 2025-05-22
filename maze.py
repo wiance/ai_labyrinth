@@ -10,9 +10,9 @@ class Maze:
             size: labirinto dydis (size x size)
         """
         self.size = size
-        self.grid = np.zeros((size, size), dtype=int)  # 0 - kelias, 1 - siena
-        self.start = (0, 0)  # Pradžios taškas
-        self.end = (size-1, size-1)  # Pabaigos taškas
+        self.grid = np.zeros((size, size), dtype=int)
+        self.start = (0, 0)
+        self.end = (size-1, size-1)
     
     def set_wall(self, row, col):
         """Nustato sieną nurodytoje pozicijoje"""
@@ -33,12 +33,12 @@ class Maze:
     def set_start(self, row, col):
         """Nustato pradžios tašką"""
         self.start = (row, col)
-        self.set_path(row, col)  # Užtikrinti, kad pradžios taške nėra sienos
+        self.set_path(row, col)
     
     def set_end(self, row, col):
         """Nustato pabaigos tašką"""
         self.end = (row, col)
-        self.set_path(row, col)  # Užtikrinti, kad pabaigos taške nėra sienos
+        self.set_path(row, col)
     
     def get_neighbors(self, row, col):
         """Grąžina visus gretimus taškus
@@ -51,12 +51,11 @@ class Maze:
             list: gretimų taškų sąrašas [(eilutė, stulpelis), ...]
         """
         neighbors = []
-        directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]  # Aukštyn, dešinėn, žemyn, kairėn
+        directions = [(-1, 0), (0, 1), (1, 0), (0, -1)] 
         
         for dr, dc in directions:
             new_row, new_col = row + dr, col + dc
             
-            # Patikrinti, ar naujos koordinatės yra labirinto ribose
             if 0 <= new_row < self.size and 0 <= new_col < self.size:
                 neighbors.append((new_row, new_col))
         

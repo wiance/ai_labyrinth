@@ -11,7 +11,6 @@ import os
 # Kad TensorFlow nekeltų bereikalingų pranešimų
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-# Supaprastinta labirinto aplinka greitam testavimui
 class SimpleEnvironment:
     """Supaprastinta labirinto aplinka greitam testavimui"""
     
@@ -21,27 +20,20 @@ class SimpleEnvironment:
     
     def reset(self):
         """Iš naujo nustato aplinką"""
-        # Sukurti supaprastintą reprezentaciją labirinto būsenai
         self.state = np.zeros((self.size, self.size, 3))
         
-        # Atsitiktinai parinkti agento poziciją
         self.agent_pos = (0, 0)
         
-        # Tikslo pozicija visada kampe
         self.goal_pos = (self.size-1, self.size-1)
         
-        # Atsitiktinai sugeneruoti sienas (1 - siena, 0 - kelias)
-        # Paprasta versija - tiesiog keletas atsitiktinių sienų
         self.walls = np.zeros((self.size, self.size))
         
-        wall_count = self.size  # Sienų skaičius proporcingas labirinto dydžiui
+        wall_count = self.size
         for _ in range(wall_count):
             x, y = random.randint(0, self.size-1), random.randint(0, self.size-1)
-            # Nestatyti sienų starto ir tikslo pozicijose
             if (x, y) != self.agent_pos and (x, y) != self.goal_pos:
                 self.walls[y, x] = 1
         
-        # Atnaujinti būseną
         self._update_state()
         
         return self._get_observation()
@@ -61,8 +53,6 @@ class SimpleEnvironment:
         self.state[self.goal_pos[1], self.goal_pos[0], 2] = 1
     
     def _get_observation(self):
-        """Grąžina stebėjimą kaip 3D masyvą"""
-        # Grąžina būseną tokiu formatu, kokį tikisi DQN (batch dydis 1)
         return np.expand_dims(self.state, axis=0)
     
     def step(self, action):
@@ -77,46 +67,37 @@ class SimpleEnvironment:
             done: ar žaidimas baigtas
             info: papildoma informacija
         """
-        # Dabartinė pozicija
         x, y = self.agent_pos
         
-        # Nauja pozicija pagal veiksmą
-        if action == 0:  # Aukštyn
+        if action == 0:
             new_pos = (x, max(0, y-1))
-        elif action == 1:  # Dešinėn
+        elif action == 1:
             new_pos = (min(self.size-1, x+1), y)
-        elif action == 2:  # Žemyn
+        elif action == 2:
             new_pos = (x, min(self.size-1, y+1))
-        elif action == 3:  # Kairėn
+        elif action == 3:
             new_pos = (max(0, x-1), y)
         else:
             raise ValueError(f"Neteisingas veiksmas: {action}")
         
-        # Patikrinti, ar nauja pozicija yra siena
         new_x, new_y = new_pos
-        done = False  # Inicializuojame done su numatyta reikšme False
+        done = False
         
         if self.walls[new_y, new_x] == 1:
-            # Atsitrenkė į sieną - pasilikti toje pačioje pozicijoje
-            reward = -1  # Bauda už atsitrenkimą į sieną
+            reward = -1
         else:
-            # Jei ne siena, atnaujinti poziciją
             self.agent_pos = new_pos
             
-            # Atlygiai
             if self.agent_pos == self.goal_pos:
-                reward = 10  # Didelis atlygis už tikslo pasiekimą
+                reward = 10
                 done = True
             else:
-                reward = -0.1  # Maža bauda už kiekvieną žingsnį
+                reward = -0.1
         
-        # Atnaujinti būseną
         self._update_state()
         
-        # Grąžinti stebėjimą, atlygį, baigties požymį ir tuščią info žodyną
         return self._get_observation(), reward, done, {}
 
-# Testuojama modifikuota DQNAgent versija
 class DQNAgentTest:
     """Deep Q-Network (DQN) agento klasė su modifikuojama struktūra"""
 
@@ -128,14 +109,14 @@ class DQNAgentTest:
             action_space: galimų veiksmų skaičius
             model_type: modelio tipas ('simple', 'medium', 'complex', 'conv')
         """
-        self.input_shape = input_shape  # Įvesties forma
-        self.action_space = action_space  # Galimų veiksmų skaičius
-        self.memory = deque(maxlen=2000)  # Patirties atmintis
-        self.epsilon = 1.0  # Epsilon-godusis parametras
-        self.epsilon_min = 0.01  # Minimali epsilon reikšmė
-        self.gamma = 0.93  # Diskonto faktorius
-        self.epsilon_decay = 0.8  # Epsilon mažėjimo greitis
-        self.learning_rate = 0.009  # Mokymosi greitis
+        self.input_shape = input_shape
+        self.action_space = action_space
+        self.memory = deque(maxlen=2000)
+        self.epsilon = 1.0
+        self.epsilon_min = 0.01
+        self.gamma = 0.93
+        self.epsilon_decay = 0.8
+        self.learning_rate = 0.009
         self.model_type = model_type
         
         self.model = self._build_model()
@@ -181,7 +162,6 @@ class DQNAgentTest:
         else:
             raise ValueError(f"Nežinomas modelio tipas: {self.model_type}")
         
-        # Kompiliuoti modelį
         model.compile(
             loss="mse", optimizer=Adam(learning_rate=self.learning_rate)
         )
@@ -234,23 +214,18 @@ class DQNAgentTest:
             steps = 0
             
             while not done and steps < max_steps:
-                # Pasirinkti veiksmą
                 action = self.act(state)
                 
-                # Atlikti veiksmą
                 next_state, reward, done, _ = env.step(action)
                 
-                # Įsiminti patirtį
                 self.remember(state, action, reward, next_state, done)
                 
-                # Pereiti į kitą būseną
                 state = next_state
                 
-                # Pridėti atlygį prie rezultato
                 score += reward
                 steps += 1
                 
-                # Apmokyti modelį
+                # kas 10 žng
                 if len(self.memory) > batch_size and steps % 10 == 0:
                     self.replay(batch_size)
             
@@ -265,16 +240,14 @@ class DQNAgentTest:
 
 def test_model_types():
     """Testuoja skirtingus modelių tipus ir palygina rezultatus"""
-    # Parametrai
     maze_size = 5
-    episodes = 50  # Mažesnis epizodų skaičius greitam testavimui
+    episodes = 50
     model_types = ["simple", "medium", "complex", "conv"]
     
     # Rezultatai
     all_scores = {}
     all_steps = {}
     
-    # Testuoti kiekvieną modelio tipą
     for model_type in model_types:
         print(f"\n==== Testuojamas modelio tipas: {model_type} ====")
         
@@ -295,10 +268,8 @@ def test_model_types():
         all_scores[model_type] = scores
         all_steps[model_type] = steps
     
-    # Atvaizduoti rezultatus
     plt.figure(figsize=(15, 10))
     
-    # Atlygių grafikas
     plt.subplot(2, 1, 1)
     for model_type, scores in all_scores.items():
         plt.plot(scores, label=model_type)
@@ -308,7 +279,6 @@ def test_model_types():
     plt.legend()
     plt.grid(True)
     
-    # Žingsnių grafikas
     plt.subplot(2, 1, 2)
     for model_type, steps in all_steps.items():
         plt.plot(steps, label=model_type)
@@ -318,9 +288,6 @@ def test_model_types():
     plt.legend()
     plt.grid(True)
     
-    plt.tight_layout()
-    plt.savefig('model_comparison.png')
-    plt.show()
     
     # Išvesti papildomą statistiką
     print("\n==== Rezultatai ====")
@@ -332,10 +299,8 @@ def test_model_types():
         print(f"  Vidutinis žingsnių skaičius (paskutiniai 10 epizodų): {avg_steps:.2f}")
 
 if __name__ == "__main__":
-    # Nustatyti atsitiktinių skaičių sėklą, kad rezultatai būtų pakartojami
     np.random.seed(42)
     random.seed(42)
     
-    # Paleisti testavimą
     print("Pradedamas modelių testavimas...")
     test_model_types()
